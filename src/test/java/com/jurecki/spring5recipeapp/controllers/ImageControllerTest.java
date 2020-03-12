@@ -1,6 +1,7 @@
 package com.jurecki.spring5recipeapp.controllers;
 
 import com.jurecki.spring5recipeapp.commands.RecipeCommand;
+import com.jurecki.spring5recipeapp.exceptions.ControllerExceptionHandler;
 import com.jurecki.spring5recipeapp.services.ImageService;
 import com.jurecki.spring5recipeapp.services.RecipeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,9 @@ public class ImageControllerTest {
         MockitoAnnotations.initMocks(this);
 
         controller = new ImageController(imageService, recipeService);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new ControllerExceptionHandler())
+                .build();
     }
 
     @Test
@@ -97,5 +100,13 @@ public class ImageControllerTest {
         byte[] reponseBytes = response.getContentAsByteArray();
 
         assertEquals(s.getBytes().length, reponseBytes.length);
+    }
+
+    @Test
+    public void testGetImageNumberFormatException() throws Exception{
+
+        mockMvc.perform(get("/recipe/asdf/recipeimage"))
+                .andExpect(status().isBadRequest())
+                .andExpect(view().name("400error"));
     }
 }
